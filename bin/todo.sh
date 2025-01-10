@@ -1,5 +1,10 @@
 #!/bin/bash
-task_file="./todo.txt"
+
+task_file="$HOME/.todo.txt"
+
+if [ ! -f "$task_file" ]; then
+    touch "$task_file"
+fi
 arg1="$1"
 arg2="$2"
 arg3="$3"
@@ -52,15 +57,10 @@ elif [[ "$arg1" == "-m" && -n "$arg2" ]]; then
     done
     sed -i "/$task_name/d" ./todo.txt
     echo "$result" >> "$task_file"
-    echo "$result"
   else
     echo "task not found: 'todo ls' to list all tasks"
   fi
 else
   echo "Command not recognized. Type 'todo --help' to view all commands."
 fi 
-
-
-
-
 

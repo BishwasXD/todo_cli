@@ -37,7 +37,7 @@ elif [[ "$arg1" == "rm" && -n "$arg2" ]]; then
   done
   grep -q "$task_name" "$task_file"
   if [ $? -eq 0 ]; then
-      sed -i "/$task_name/d" ./todo.txt
+      sed -i "/$task_name/d" "$task_file"
       echo "task removed successfully"
   else
     echo "Not found"
@@ -55,7 +55,7 @@ elif [[ "$arg1" == "-m" && -n "$arg2" ]]; then
     for(( i=0; i<${#task_name}; i++ )); do
       result+="${task_name:$i:1}$strike"
     done
-    sed -i "/$task_name/d" ./todo.txt
+    sed -i "/$task_name/d" "$task_file"
     echo "$result" >> "$task_file"
   else
     echo "task not found: 'todo ls' to list all tasks"

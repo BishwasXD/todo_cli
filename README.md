@@ -11,4 +11,6 @@
     git clone https://github.com/BishwasXD/todo_cli.git && \
     cd todo_cli && \
     chmod +x bin/todo.sh && \
-    sudo mv bin/todo.sh /usr/local/bin/todo
+    sudo mv bin/todo.sh /usr/local/bin/todo && \
+    echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bashrc && \
+    source ~/.bashrc

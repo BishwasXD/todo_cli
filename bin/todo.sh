@@ -10,12 +10,18 @@ if [[ "$arg1" == "ls" && -z "$arg2" ]]; then
   done < "$task_file"
 
 elif [[ "$arg1" == "add" && -n "$arg2" ]]; then
-  echo "$arg2" >> "$task_file"
-  echo "Added: $arg2"
+  task_name="$arg2"
+  shift 2
+  for arg in "$@"; do
+    task_name+=" $arg"
+  done
+  echo "$task_name" >> "$task_file"
+  echo "Added: $task_name"
 
 elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo ls: lists all task"
   echo "todo add task_name: add new task" 
+  echo "todo rm task_name: remove task"
 
 elif [[ "$arg1" == "rm" && -n "$arg2" ]]; then
   task_name="$arg2"
@@ -30,6 +36,9 @@ elif [[ "$arg1" == "rm" && -n "$arg2" ]]; then
   else
     echo "Not found"
   fi
+elif [[ "$arg1" == "-m" && -n "$arg2" ]]; then
+  echo "not implemented"
+  
 else
   echo "Command not recognized. Type 'todo --help' to view all commands."
 fi 

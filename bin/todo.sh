@@ -58,6 +58,11 @@ elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo add task_name: add new task" 
   echo "todo rm task_name: remove task"
   echo "todo -m task_name: mark task done" 
+  echo "todo rm -m task_name: remove marked task"
+  echo "todo add -h task_name: add task as high priority"
+  echo "todo add -l task_name: add task as low priority"
+  echo "todo add -m task_name: add task as medium priority"
+
 
 elif [[ "$arg1" == "rm" && -n "$arg2" && "$arg2" != "-m" ]]; then
   task_name="$arg2"

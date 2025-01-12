@@ -27,12 +27,17 @@ elif [[ "$arg1" == "add" && -n "$arg2" ]]; then
       for arg in "$@"; do
         task_name+="$arg"
       done
-      if [ "$arg2" == "-h" ]; then
-        echo -e "${RED}$task_name" >> "$task_file"
-      elif [ "$arg2" == "-l" ]; then
-        echo -e "${GREEN}$task_name" >> "$task_file"
-      elif [ "$arg2" == "-m" ]; then
-        echo -e "${YELLOW}$task_name" >> "$task_file"
+      if grep -q "$task_name" "$task_file"; then
+        echo "duplicate task found: 'todo ls to list all tasks"
+      else
+        if [ "$arg2" == "-h" ]; then
+          echo -e "${RED}$task_name" >> "$task_file"
+        elif [ "$arg2" == "-l" ]; then
+          echo -e "${GREEN}$task_name" >> "$task_file"
+        elif [ "$arg2" == "-m" ]; then
+          echo -e "${YELLOW}$task_name" >> "$task_file"
+        fi
+      echo "new task added: $task_name"
       fi
   else
     task_name="$arg2"
@@ -40,9 +45,13 @@ elif [[ "$arg1" == "add" && -n "$arg2" ]]; then
     for arg in "$@"; do
       task_name+=" $arg"
     done
-    echo -e "${DEFAULT_COLOR}$task_name" >> "$task_file"
+    if grep -q "$task_name" "$task_file"; then
+      echo "duplicate task found: 'todo ls' to list all tasks"
+    else
+      echo -e "${DEFAULT_COLOR}$task_name" >> "$task_file"
+      echo "new task added: $task_name"
+    fi
   fi
-  echo "new task added: $task_name"
 
 elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo ls: lists all task"

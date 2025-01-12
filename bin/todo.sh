@@ -1,5 +1,4 @@
 #!/bin/bash
-
 task_file="$HOME/.todo.txt"
 
 if [ ! -f "$task_file" ]; then
@@ -21,7 +20,7 @@ elif [[ "$arg1" == "add" && -n "$arg2" ]]; then
     task_name+=" $arg"
   done
   echo "$task_name" >> "$task_file"
-  echo "Added: $task_name"
+  echo "new task added: $task_name"
 
 elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo ls: lists all task"
@@ -29,7 +28,7 @@ elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo rm task_name: remove task"
   echo "todo -m task_name: mark task done" 
 
-elif [[ "$arg1" == "rm" && -n "$arg2" ]]; then
+elif [[ "$arg1" == "rm" && -n "$arg2" && "$arg2" != "-m" ]]; then
   task_name="$arg2"
   shift 2
   for arg in "$@"; do
@@ -40,7 +39,7 @@ elif [[ "$arg1" == "rm" && -n "$arg2" ]]; then
       sed -i "/$task_name/d" "$task_file"
       echo "task removed successfully"
   else
-    echo "Not found"
+    echo "task not found: 'todo ls' to list all tasks"
   fi
 elif [[ "$arg1" == "-m" && -n "$arg2" ]]; then
   strike=$'\u0336'
@@ -57,10 +56,29 @@ elif [[ "$arg1" == "-m" && -n "$arg2" ]]; then
     done
     sed -i "/$task_name/d" "$task_file"
     echo "$result" >> "$task_file"
+    echo "$task_name: task marked done"
   else
     echo "task not found: 'todo ls' to list all tasks"
   fi
+elif [[ "$arg1" == "rm" && "$arg2" == "-m" && -n "$arg3" ]]; then
+  task_name="$arg3"
+  shift 3
+  for arg in "$@"; do
+    task_name+=" $arg"
+  done
+  strike=$'\u0336'
+  marked_task=""
+  for (( i=0; i<${#task_name}; i++ )); do
+    marked_task+="${task_name:$i:1}$strike"
+  done
+  if grep -q "$marked_task" "$task_file"; then
+    sed -i "/$marked_task/d" "$task_file"
+    echo "task removed successfully"
+  else
+    echo "task not found: 'todo ls' to list all tasks"
+  fi 
 else
+
   echo "Command not recognized. Type 'todo --help' to view all commands."
-fi 
+fi
 

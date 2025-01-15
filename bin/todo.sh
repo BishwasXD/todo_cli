@@ -59,8 +59,6 @@ elif [[ "$arg1" == "add" && -n "$arg2" ]]; then
       task+=" $arg"
     done
   fi
-  echo "$task"
-
   if grep -q "^$task;;;" "$task_file"; then
     echo "duplicate task found: 'todo ls' to view all tasks"
   else
@@ -121,9 +119,7 @@ elif [[ "$arg1" == "rm" && "$arg2" == "-m" && -n "$arg3" ]]; then
     marked_task+="${task_name:$i:1}$strike"
   done
   if grep -qE "^$task_name;;;[hmls]$" "$task_file";then
-      echo "$task_name"
       escaped_task_name=$(printf '%s\n' "$task_name;;;" | sed 's/[]\/$*.^[]/\\&/g')
-      echo "ESCAPED $escaped_task_name"
       sed -i "/$escaped_task_name/d" "$task_file"
       echo "task removed successfully"
   else

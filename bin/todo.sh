@@ -8,50 +8,65 @@ fi
 arg1="$1"
 arg2="$2"
 arg3="$3"
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-DEFAULT_COLOR="$GREEN"
-
+RED='\e[1;91m'
+GREEN='\e[1;92m'
+YELLOW='\e[1;93m'
+RESET='\e[0m'
+strike=$'\u0336'
 if [[ "$arg1" == "ls" && -z "$arg2" ]]; then 
+  tasks=""
   while read -r line; do
-    task="$line"
-    echo "$line"
+    task=$(echo "$line" | awk -F ";;;" '{print $1}')
+    priority=$(echo "$line" | awk -F ";;;" '{print $2}')
+    if [[ "$priority" == "h" ]]; then
+      tasks+="${RED}${task}${RESET}    "
+    elif [[ "$priority" == "m" ]]; then
+      tasks+="${YELLOW}${task}${RESET}    "
+    elif [[ "$priority" == "l" ]]; then
+      tasks+="${GREEN}${task}${RESET}    "
+    elif [[ "$priority" == "s" ]]; then
+      striked=""
+      for (( i=0; i<${#task}; i++ )); do
+        striked+="${task:$i:1}${strike}"
+      done
+      tasks+="${striked}"
+    else
+      tasks+="$task"
+    fi
   done < "$task_file"
+  echo -e "$tasks"
 
 elif [[ "$arg1" == "add" && -n "$arg2" ]]; then
   if [[ "$arg2" == "-h" || "$arg2" == "-l" || "$arg2" == "-m" ]]; then
-      task_name="$arg3"
-      shift 3
-      for arg in "$@"; do
-        task_name+="$arg"
-      done
-      if grep -q "$task_name" "$task_file"; then
-        echo "duplicate task found: 'todo ls to list all tasks"
-      else
-        if [ "$arg2" == "-h" ]; then
-          echo -e "${RED}$task_name" >> "$task_file"
-        elif [ "$arg2" == "-l" ]; then
-          echo -e "${GREEN}$task_name" >> "$task_file"
-        elif [ "$arg2" == "-m" ]; then
-          echo -e "${YELLOW}$task_name" >> "$task_file"
-        fi
-      echo "new task added: $task_name"
-      fi
+    priority="$arg2"
+    shift 3
+    task="$arg3"
+    for arg in "$@"; do
+      task+=" $arg"
+    done
+    if [[ "$priority" == "-h" ]]; then
+      priority_suffix="h"
+    elif [[ "$priority" == "-m" ]]; then
+      priority_suffix="m"
+    else
+      priority_suffix="l"
+    fi
   else
-    task_name="$arg2"
+    priority_suffix="l"
+    task="$arg2"
     shift 2
     for arg in "$@"; do
-      task_name+=" $arg"
+      task+=" $arg"
     done
-    if grep -q "$task_name" "$task_file"; then
-      echo "duplicate task found: 'todo ls' to list all tasks"
-    else
-      echo -e "${DEFAULT_COLOR}$task_name" >> "$task_file"
-      echo "new task added: $task_name"
-    fi
   fi
+  echo "$task"
+
+  if grep -q "^$task;;;" "$task_file"; then
+    echo "duplicate task found: 'todo ls' to view all tasks"
+  else
+    echo "$task;;;${priority_suffix}" >> "$task_file"
+    echo "task added successfully"
+fi
 
 elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo ls: lists all task"
@@ -63,57 +78,57 @@ elif [[ "$arg1" == "--help" && -z "$arg2" ]];then
   echo "todo add -l task_name: add task as low priority"
   echo "todo add -m task_name: add task as medium priority"
 
-
 elif [[ "$arg1" == "rm" && -n "$arg2" && "$arg2" != "-m" ]]; then
   task_name="$arg2"
   shift 2
   for arg in "$@"; do
     task_name+=" $arg"
   done
-  grep -q "$task_name" "$task_file"
-  if [ $? -eq 0 ]; then
-      sed -i "/$task_name/d" "$task_file"
+  if grep -qE "^$task_name;;;[hmls]$" "$task_file";then
+      echo "$task_name"
+      escaped_task_name=$(printf '%s\n' "$task_name;;;" | sed 's/[]\/$*.^[]/\\&/g')
+      echo "ESCAPED $escaped_task_name"
+      sed -i "/$escaped_task_name/d" "$task_file"
       echo "task removed successfully"
   else
     echo "task not found: 'todo ls' to list all tasks"
   fi
+
 elif [[ "$arg1" == "-m" && -n "$arg2" ]]; then
-  strike=$'\u0336'
   task_name="$arg2"
   result=""
   shift 2
   for arg in "$@"; do
     task_name+=" $arg"
   done
-  grep -q "$task_name" "$task_file"
-  if [ $? -eq 0 ]; then
-    for(( i=0; i<${#task_name}; i++ )); do
-      result+="${task_name:$i:1}$strike"
-    done
-    sed -i "/$task_name/d" "$task_file"
-    echo "$result" >> "$task_file"
-    echo "$task_name: task marked done"
+  if grep -qE "^$task_name;;;[hml]$" "$task_file"; then
+    escaped_task_name=$(printf '%s\n' "$task_name;;;" | sed 's/[]\/$*.^[]/\\&/g')
+    sed -i "/$escaped_task_name/d" "$task_file"
+    echo "$task_name;;;s" >> "$task_file"
+    echo "task ${task} marked done"
   else
     echo "task not found: 'todo ls' to list all tasks"
   fi
+
 elif [[ "$arg1" == "rm" && "$arg2" == "-m" && -n "$arg3" ]]; then
   task_name="$arg3"
   shift 3
   for arg in "$@"; do
     task_name+=" $arg"
   done
-  strike=$'\u0336'
   marked_task=""
   for (( i=0; i<${#task_name}; i++ )); do
     marked_task+="${task_name:$i:1}$strike"
   done
-  if grep -q "$marked_task" "$task_file"; then
-    sed -i "/$marked_task/d" "$task_file"
-    echo "task removed successfully"
+  if grep -qE "^$task_name;;;[hmls]$" "$task_file";then
+      echo "$task_name"
+      escaped_task_name=$(printf '%s\n' "$task_name;;;" | sed 's/[]\/$*.^[]/\\&/g')
+      echo "ESCAPED $escaped_task_name"
+      sed -i "/$escaped_task_name/d" "$task_file"
+      echo "task removed successfully"
   else
     echo "task not found: 'todo ls' to list all tasks"
   fi 
 else
   echo "Command not recognized. Type 'todo --help' to view all commands."
 fi
-

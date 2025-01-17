@@ -29,7 +29,7 @@ if [[ "$arg1" == "ls" && -z "$arg2" ]]; then
       for (( i=0; i<${#task}; i++ )); do
         striked+="${task:$i:1}${strike}"
       done
-      tasks+="${striked}"
+      tasks+="${striked}    "
     else
       tasks+="$task"
     fi
@@ -118,7 +118,7 @@ elif [[ "$arg1" == "rm" && "$arg2" == "-m" && -n "$arg3" ]]; then
   for (( i=0; i<${#task_name}; i++ )); do
     marked_task+="${task_name:$i:1}$strike"
   done
-  if grep -qE "^$task_name;;;[hmls]$" "$task_file";then
+  if grep -qE "^$task_name;;;[s]$" "$task_file";then
       escaped_task_name=$(printf '%s\n' "$task_name;;;" | sed 's/[]\/$*.^[]/\\&/g')
       sed -i "/$escaped_task_name/d" "$task_file"
       echo "task removed successfully"

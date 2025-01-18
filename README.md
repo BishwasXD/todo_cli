@@ -30,6 +30,7 @@
     chmod +x bin/todo.sh  && \       
     sudo mv bin/todo.sh /usr/local/bin/todo
 
-#Images
+![github readme](https://github.com/user-attachments/assets/ba60a42b-75aa-451b-a819-cc2a36a5501f)
+
     
- ![screenshot](~/Pictures/github readme.png)
+ 

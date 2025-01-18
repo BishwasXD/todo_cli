@@ -25,7 +25,7 @@
     source ~/.bashrc
 
 # Update
-    cd ~/todo_cli && \              
+    cd ~/Todo-CLI && \              
     git pull origin main && \         
     chmod +x bin/todo.sh  && \       
     sudo mv bin/todo.sh /usr/local/bin/todo
